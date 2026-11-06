@@ -1,0 +1,257 @@
+name: billiards-practices
+services:
+  postgres:
+    image: docker.io/library/postgres:17-alpine
+    environment:
+      POSTGRES_USER: micro_admin
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-micro_admin_dev}
+      POSTGRES_DB: postgres
+    volumes:
+    - postgres-data:/var/lib/postgresql/data
+    - ./infra/init-databases.sql:/docker-entrypoint-initdb.d/01-databases.sql:ro
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - pg_isready -U micro_admin -d postgres
+      interval: 5s
+      timeout: 5s
+      retries: 15
+  rabbitmq:
+    image: docker.io/library/rabbitmq:4-management
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-micro}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-micro}
+    ports:
+    - 127.0.0.1:5672:5672
+    - 127.0.0.1:15672:15672
+    volumes:
+    - rabbitmq-data:/var/lib/rabbitmq
+    - ./infra/rabbitmq.conf:/etc/rabbitmq/conf.d/20-practice5.conf:ro
+    healthcheck:
+      test:
+      - CMD
+      - rabbitmq-diagnostics
+      - -q
+      - ping
+      interval: 5s
+      timeout: 5s
+      retries: 20
+  users:
+    build:
+      context: .
+      dockerfile: services/users/Dockerfile
+    environment:
+      DATABASE_URL: postgresql+psycopg://users:users_dev@postgres:5432/users
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-micro}:${RABBITMQ_PASSWORD:-micro}@rabbitmq:5672/
+      PROVIDER_TOKEN: ${PROVIDER_TOKEN:-demo-provider-token}
+    ports:
+    - 127.0.0.1:8001:8000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test:
+      - CMD
+      - python
+      - -c
+      - import urllib.request; urllib.request.urlopen('http://localhost:8000/health',
+        timeout=3)
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+  catalog:
+    build:
+      context: .
+      dockerfile: services/catalog/Dockerfile
+    environment:
+      DATABASE_URL: postgresql+psycopg://catalog:catalog_dev@postgres:5432/catalog
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-micro}:${RABBITMQ_PASSWORD:-micro}@rabbitmq:5672/
+      PROVIDER_TOKEN: ${PROVIDER_TOKEN:-demo-provider-token}
+    ports:
+    - 127.0.0.1:8002:8000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test:
+      - CMD
+      - python
+      - -c
+      - import urllib.request; urllib.request.urlopen('http://localhost:8000/health',
+        timeout=3)
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+  schedule:
+    build:
+      context: .
+      dockerfile: services/schedule/Dockerfile
+    environment:
+      DATABASE_URL: postgresql+psycopg://schedule:schedule_dev@postgres:5432/schedule
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-micro}:${RABBITMQ_PASSWORD:-micro}@rabbitmq:5672/
+      PROVIDER_TOKEN: ${PROVIDER_TOKEN:-demo-provider-token}
+    ports:
+    - 127.0.0.1:8003:8000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test:
+      - CMD
+      - python
+      - -c
+      - import urllib.request; urllib.request.urlopen('http://localhost:8000/health',
+        timeout=3)
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+  bookings:
+    build:
+      context: .
+      dockerfile: services/bookings/Dockerfile
+    environment:
+      DATABASE_URL: postgresql+psycopg://bookings:bookings_dev@postgres:5432/bookings
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-micro}:${RABBITMQ_PASSWORD:-micro}@rabbitmq:5672/
+      PROVIDER_TOKEN: ${PROVIDER_TOKEN:-demo-provider-token}
+    ports:
+    - 127.0.0.1:8004:8000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test:
+      - CMD
+      - python
+      - -c
+      - import urllib.request; urllib.request.urlopen('http://localhost:8000/health',
+        timeout=3)
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+  pricing:
+    build:
+      context: .
+      dockerfile: services/pricing/Dockerfile
+    environment:
+      DATABASE_URL: postgresql+psycopg://pricing:pricing_dev@postgres:5432/pricing
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-micro}:${RABBITMQ_PASSWORD:-micro}@rabbitmq:5672/
+      PROVIDER_TOKEN: ${PROVIDER_TOKEN:-demo-provider-token}
+    ports:
+    - 127.0.0.1:8005:8000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test:
+      - CMD
+      - python
+      - -c
+      - import urllib.request; urllib.request.urlopen('http://localhost:8000/health',
+        timeout=3)
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+  payments:
+    build:
+      context: .
+      dockerfile: services/payments/Dockerfile
+    environment:
+      DATABASE_URL: postgresql+psycopg://payments:payments_dev@postgres:5432/payments
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-micro}:${RABBITMQ_PASSWORD:-micro}@rabbitmq:5672/
+      PROVIDER_TOKEN: ${PROVIDER_TOKEN:-demo-provider-token}
+    ports:
+    - 127.0.0.1:8006:8000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test:
+      - CMD
+      - python
+      - -c
+      - import urllib.request; urllib.request.urlopen('http://localhost:8000/health',
+        timeout=3)
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+  sessions:
+    build:
+      context: .
+      dockerfile: services/sessions/Dockerfile
+    environment:
+      DATABASE_URL: postgresql+psycopg://sessions:sessions_dev@postgres:5432/sessions
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-micro}:${RABBITMQ_PASSWORD:-micro}@rabbitmq:5672/
+      PROVIDER_TOKEN: ${PROVIDER_TOKEN:-demo-provider-token}
+    ports:
+    - 127.0.0.1:8007:8000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test:
+      - CMD
+      - python
+      - -c
+      - import urllib.request; urllib.request.urlopen('http://localhost:8000/health',
+        timeout=3)
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+  notifications:
+    build:
+      context: .
+      dockerfile: services/notifications/Dockerfile
+    environment:
+      DATABASE_URL: postgresql+psycopg://notifications:notifications_dev@postgres:5432/notifications
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-micro}:${RABBITMQ_PASSWORD:-micro}@rabbitmq:5672/
+      PROVIDER_TOKEN: ${PROVIDER_TOKEN:-demo-provider-token}
+    ports:
+    - 127.0.0.1:8008:8000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test:
+      - CMD
+      - python
+      - -c
+      - import urllib.request; urllib.request.urlopen('http://localhost:8000/health',
+        timeout=3)
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+volumes:
+  postgres-data: {}
+  rabbitmq-data: {}

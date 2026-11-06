@@ -1,0 +1,34 @@
+{
+  "group": "ikbo-63-23",
+  "assignment_note": "Варианты согласованы: Данек — 1, Саша — 2, Андрей — 3 (перенос с 4 из-за совпадения), Анвар — 4.",
+  "students": {
+    "danek": {
+      "name": "Данек",
+      "surname": "chernovasilenko",
+      "initials": "Д. С.",
+      "last_digit": 1,
+      "variant": 1
+    },
+    "sasha": {
+      "name": "Саша",
+      "surname": "volentir",
+      "initials": "А. Ф.",
+      "last_digit": 2,
+      "variant": 2
+    },
+    "andrey": {
+      "name": "Андрей",
+      "surname": "isachenko",
+      "initials": "А. Д.",
+      "last_digit": 8,
+      "variant": 3
+    },
+    "anvar": {
+      "name": "Анвар",
+      "surname": "nartadzhiev",
+      "initials": "А. Р.",
+      "last_digit": 8,
+      "variant": 4
+    }
+  }
+}

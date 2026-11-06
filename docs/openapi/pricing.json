@@ -1,0 +1,450 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Billiards · pricing",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/tariffs": {
+      "post": {
+        "tags": [
+          "Тарифы и предложения"
+        ],
+        "summary": "Опубликовать новую неизменяемую версию тарифа",
+        "operationId": "publish_api_tariffs_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublishTariff"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TariffResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Тарифы и предложения"
+        ],
+        "summary": "Получить версии тарифов",
+        "operationId": "list_tariffs_api_tariffs_get",
+        "parameters": [
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "game_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "pool",
+                    "russian",
+                    "snooker"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Game Type"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TariffResponse"
+                  },
+                  "title": "Response List Tariffs Api Tariffs Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/quotes": {
+      "post": {
+        "tags": [
+          "Тарифы и предложения"
+        ],
+        "summary": "Рассчитать стоимость после проверки стола в S2",
+        "operationId": "quote_api_quotes_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuoteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuoteResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/quotes/{quote_id}:validate": {
+      "post": {
+        "tags": [
+          "Тарифы и предложения"
+        ],
+        "summary": "Проверить срок и применимость ценового предложения",
+        "operationId": "validate_api_quotes__quote_id__validate_post",
+        "parameters": [
+          {
+            "name": "quote_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Quote Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuoteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuoteResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "PublishTariff": {
+        "properties": {
+          "game_type": {
+            "type": "string",
+            "enum": [
+              "pool",
+              "russian",
+              "snooker"
+            ],
+            "title": "Game Type"
+          },
+          "hourly_rate": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Hourly Rate",
+            "description": "Цена часа в копейках; только RUB"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "game_type",
+          "hourly_rate"
+        ],
+        "title": "PublishTariff"
+      },
+      "QuoteRequest": {
+        "properties": {
+          "table_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Table Id"
+          },
+          "start_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Start At",
+            "description": "Начало игры с часовым поясом; шаг 30 минут"
+          },
+          "end_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "End At",
+            "description": "Конец игры; длительность от 1 до 4 часов"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "table_id",
+          "start_at",
+          "end_at"
+        ],
+        "title": "QuoteRequest"
+      },
+      "QuoteResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "UUID ценового предложения"
+          },
+          "table_id": {
+            "type": "string",
+            "title": "Table Id"
+          },
+          "start_at": {
+            "type": "string",
+            "title": "Start At"
+          },
+          "end_at": {
+            "type": "string",
+            "title": "End At"
+          },
+          "amount": {
+            "type": "integer",
+            "title": "Amount",
+            "description": "Зафиксированная цена всей игры в копейках"
+          },
+          "currency": {
+            "type": "string",
+            "const": "RUB",
+            "title": "Currency"
+          },
+          "expires_at": {
+            "type": "string",
+            "title": "Expires At",
+            "description": "Предложение действительно строго до этого момента"
+          },
+          "tariff_id": {
+            "type": "string",
+            "title": "Tariff Id"
+          },
+          "tariff_version": {
+            "type": "integer",
+            "title": "Tariff Version"
+          },
+          "hourly_rate": {
+            "type": "integer",
+            "title": "Hourly Rate",
+            "description": "Ставка исходной версии тарифа, в копейках"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "table_id",
+          "start_at",
+          "end_at",
+          "amount",
+          "currency",
+          "expires_at",
+          "tariff_id",
+          "tariff_version",
+          "hourly_rate"
+        ],
+        "title": "QuoteResponse"
+      },
+      "TariffResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "UUID версии тарифа"
+          },
+          "game_type": {
+            "type": "string",
+            "enum": [
+              "pool",
+              "russian",
+              "snooker"
+            ],
+            "title": "Game Type"
+          },
+          "hourly_rate": {
+            "type": "integer",
+            "title": "Hourly Rate",
+            "description": "Цена часа в копейках"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "currency": {
+            "type": "string",
+            "const": "RUB",
+            "title": "Currency"
+          },
+          "published_at": {
+            "type": "string",
+            "title": "Published At",
+            "description": "Момент публикации в UTC"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "game_type",
+          "hourly_rate",
+          "version",
+          "currency",
+          "published_at"
+        ],
+        "title": "TariffResponse"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8005"
+    }
+  ]
+}

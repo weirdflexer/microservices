@@ -1,0 +1,12 @@
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--import-mode=importlib -ra"
+pythonpath = ["."]
+markers = ["integration: requires a real PostgreSQL/RabbitMQ stack"]
+
+[tool.coverage.run]
+source = ["services", "common", "practice5"]
+omit = ["*/main.py"]
+
+[tool.coverage.report]
+show_missing = true
