@@ -8,3 +8,9 @@ htmlcov/
 *.db
 .DS_Store
 reports/
+
+node_modules/
+coverage/
+*.test
+*.prof
+bin/

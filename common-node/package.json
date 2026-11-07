@@ -1,0 +1,11 @@
+{
+  "name": "billiards-node-runtime",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {"node": ">=24"},
+  "scripts": {
+    "test": "node --test tests/*.test.mjs ../services/schedule/tests/*.test.mjs ../services/sessions/tests/*.test.mjs"
+  },
+  "dependencies": {"amqplib": "^0.10.9", "pg": "^8.16.3"}
+}

@@ -95,7 +95,7 @@ services:
       context: .
       dockerfile: services/schedule/Dockerfile
     environment:
-      DATABASE_URL: postgresql+psycopg://schedule:schedule_dev@postgres:5432/schedule
+      DATABASE_URL: postgresql://schedule:schedule_dev@postgres:5432/schedule
       RABBITMQ_URL: amqp://${RABBITMQ_USER:-micro}:${RABBITMQ_PASSWORD:-micro}@rabbitmq:5672/
       PROVIDER_TOKEN: ${PROVIDER_TOKEN:-demo-provider-token}
     ports:
@@ -108,10 +108,9 @@ services:
     healthcheck:
       test:
       - CMD
-      - python
-      - -c
-      - import urllib.request; urllib.request.urlopen('http://localhost:8000/health',
-        timeout=3)
+      - node
+      - -e
+      - "fetch('http://localhost:8000/health', {signal: AbortSignal.timeout(3000)}).then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
       interval: 10s
       timeout: 5s
       retries: 5
@@ -122,7 +121,7 @@ services:
       context: .
       dockerfile: services/bookings/Dockerfile
     environment:
-      DATABASE_URL: postgresql+psycopg://bookings:bookings_dev@postgres:5432/bookings
+      DATABASE_URL: postgresql://bookings:bookings_dev@postgres:5432/bookings
       RABBITMQ_URL: amqp://${RABBITMQ_USER:-micro}:${RABBITMQ_PASSWORD:-micro}@rabbitmq:5672/
       PROVIDER_TOKEN: ${PROVIDER_TOKEN:-demo-provider-token}
     ports:
@@ -135,10 +134,8 @@ services:
     healthcheck:
       test:
       - CMD
-      - python
-      - -c
-      - import urllib.request; urllib.request.urlopen('http://localhost:8000/health',
-        timeout=3)
+      - /app/server
+      - healthcheck
       interval: 10s
       timeout: 5s
       retries: 5
@@ -176,7 +173,7 @@ services:
       context: .
       dockerfile: services/payments/Dockerfile
     environment:
-      DATABASE_URL: postgresql+psycopg://payments:payments_dev@postgres:5432/payments
+      DATABASE_URL: postgresql://payments:payments_dev@postgres:5432/payments
       RABBITMQ_URL: amqp://${RABBITMQ_USER:-micro}:${RABBITMQ_PASSWORD:-micro}@rabbitmq:5672/
       PROVIDER_TOKEN: ${PROVIDER_TOKEN:-demo-provider-token}
     ports:
@@ -189,10 +186,8 @@ services:
     healthcheck:
       test:
       - CMD
-      - python
-      - -c
-      - import urllib.request; urllib.request.urlopen('http://localhost:8000/health',
-        timeout=3)
+      - /app/server
+      - healthcheck
       interval: 10s
       timeout: 5s
       retries: 5
@@ -203,7 +198,7 @@ services:
       context: .
       dockerfile: services/sessions/Dockerfile
     environment:
-      DATABASE_URL: postgresql+psycopg://sessions:sessions_dev@postgres:5432/sessions
+      DATABASE_URL: postgresql://sessions:sessions_dev@postgres:5432/sessions
       RABBITMQ_URL: amqp://${RABBITMQ_USER:-micro}:${RABBITMQ_PASSWORD:-micro}@rabbitmq:5672/
       PROVIDER_TOKEN: ${PROVIDER_TOKEN:-demo-provider-token}
     ports:
@@ -216,10 +211,9 @@ services:
     healthcheck:
       test:
       - CMD
-      - python
-      - -c
-      - import urllib.request; urllib.request.urlopen('http://localhost:8000/health',
-        timeout=3)
+      - node
+      - -e
+      - "fetch('http://localhost:8000/health', {signal: AbortSignal.timeout(3000)}).then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
       interval: 10s
       timeout: 5s
       retries: 5

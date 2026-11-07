@@ -1,12 +1,16 @@
-FROM docker.io/library/python:3.13-slim
-WORKDIR /app
-ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-COPY common ./common
-COPY services/__init__.py ./services/__init__.py
+FROM golang:1.25-alpine AS builder
+WORKDIR /src
+COPY go.mod go.sum ./
+RUN go mod download
+COPY internal/gokit ./internal/gokit
 COPY services/payments ./services/payments
-RUN useradd --create-home appuser && chown -R appuser:appuser /app
-USER appuser
+RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/server ./services/payments/cmd
+
+FROM alpine:3.22
+RUN apk add --no-cache ca-certificates && adduser -D -u 10001 app
+WORKDIR /app
+COPY --from=builder /out/server /app/server
+USER app
 EXPOSE 8000
-CMD ["uvicorn", "services.payments.main:app", "--host", "0.0.0.0", "--port", "8000"]
+HEALTHCHECK --interval=10s --timeout=4s --retries=5 CMD ["/app/server", "healthcheck"]
+ENTRYPOINT ["/app/server"]

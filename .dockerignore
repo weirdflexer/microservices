@@ -6,3 +6,9 @@ __pycache__
 .coverage
 reports
 .env
+
+**/node_modules
+coverage/
+*.test
+*.prof
+bin/
